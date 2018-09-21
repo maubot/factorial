@@ -55,6 +55,7 @@ func factorial(n, interval int64) (result *big.Int) {
 
 const MaxFactorial = 10000
 const MaxExactValueLength = 50
+const MaxFactorialsInMessage = 10
 const ScientificNotationDecimals = 5
 
 func (bot *FactorialBot) MessageHandler(evt *maubot.Event) maubot.CommandHandlerResult {
@@ -65,8 +66,11 @@ func (bot *FactorialBot) MessageHandler(evt *maubot.Event) maubot.CommandHandler
 
 	evt.MarkRead()
 	var msg strings.Builder
-	for _, capture := range command.Captured {
-		if len(capture) != 3 {
+	for i, capture := range command.Captured {
+		if i >= MaxFactorialsInMessage {
+			fmt.Fprintf(&msg, "...")
+			break
+		} else if len(capture) != 3 {
 			continue
 		}
 
@@ -77,9 +81,11 @@ func (bot *FactorialBot) MessageHandler(evt *maubot.Event) maubot.CommandHandler
 
 		interval := len(capture[2])
 
+		symbol := "="
 		var result string
 		if n/interval > MaxFactorial {
 			result = "over 9000"
+			symbol = "is"
 		} else {
 			result = factorial(int64(n), int64(interval)).String()
 			if len(result) > MaxExactValueLength {
@@ -87,9 +93,10 @@ func (bot *FactorialBot) MessageHandler(evt *maubot.Event) maubot.CommandHandler
 					result[0],
 					result[1:ScientificNotationDecimals+1],
 					len(result)-1)
+				symbol = "≈"
 			}
 		}
-		fmt.Fprintf(&msg, "%d%s = %s  \n", n, strings.Repeat("!", interval), result)
+		fmt.Fprintf(&msg, "%d%s %s %s  \n", n, strings.Repeat("!", interval), symbol, result)
 	}
 	if msg.Len() == 0 {
 		return maubot.Continue
