@@ -13,8 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-from maubot import Plugin, CommandSpec, PassiveCommand
-from mautrix.types import MessageEvent
+from maubot import Plugin, CommandSpec, PassiveCommand, MessageEvent
 
 COMMAND_FACTORIAL = "xyz.maubot.factorial"
 
