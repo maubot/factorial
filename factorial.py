@@ -34,6 +34,9 @@ class FactorialBot(Plugin):
         ))
         self.client.add_command_handler(COMMAND_FACTORIAL, self.handler)
 
+    async def stop(self) -> None:
+        self.client.remove_command_handler(COMMAND_FACTORIAL, self.handler)
+
     @staticmethod
     def _factorial(n: int, interval: int) -> int:
         if n < 0:
