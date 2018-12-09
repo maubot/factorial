@@ -1,2 +1,2 @@
 #!/bin/bash
-zip -9r factorial.mbp factorial.py maubot.ini
+zip -9r factorial.mbp factorial.py maubot.yaml
