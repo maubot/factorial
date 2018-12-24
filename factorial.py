@@ -13,9 +13,10 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-from maubot import Plugin, CommandSpec, PassiveCommand, MessageEvent
+from typing import List, Tuple
 
-COMMAND_FACTORIAL = "xyz.maubot.factorial"
+from maubot import Plugin, MessageEvent
+from maubot.handlers import command
 
 MAX_FACTORIAL = 10000
 MAX_EXACT_VALUE_LENGTH = 50
@@ -24,19 +25,6 @@ SCIENTIFIC_NOTATION_DECIMALS = 5
 
 
 class FactorialBot(Plugin):
-    async def start(self) -> None:
-        self.set_command_spec(CommandSpec(
-            passive_commands=[PassiveCommand(
-                name=COMMAND_FACTORIAL,
-                matches="([0-9]+)(!+)",
-                match_against="body",
-            )],
-        ))
-        self.client.add_command_handler(COMMAND_FACTORIAL, self.handler)
-
-    async def stop(self) -> None:
-        self.client.remove_command_handler(COMMAND_FACTORIAL, self.handler)
-
     @staticmethod
     def _factorial(n: int, interval: int) -> int:
         if n < 0:
@@ -47,22 +35,17 @@ class FactorialBot(Plugin):
             n -= interval
         return result
 
-    async def handler(self, evt: MessageEvent) -> None:
-        try:
-            command = evt.unsigned.passive_command[COMMAND_FACTORIAL]
-        except KeyError:
-            return
+    @command.passive("([0-9]+)(!+)", multiple=True)
+    async def handler(self, evt: MessageEvent, matches: List[Tuple[str, str]]) -> None:
         await evt.mark_read()
         msgs = []
-        for capture in command.captured:
+        for _, n_str, interval_str in matches:
             if len(msgs) >= MAX_FACTORIALS_IN_MESSAGE:
                 msgs.append("...")
                 break
-            elif len(capture) != 3:
-                continue
 
-            n = int(capture[1])
-            interval = len(capture[2])
+            n = int(n_str)
+            interval = len(interval_str)
             symbol = "="
             if n / interval > MAX_FACTORIAL:
                 result = "over 9000"
