@@ -59,4 +59,4 @@ class FactorialBot(Plugin):
             msgs.append(f"{n}{'!' * interval} {symbol} {result}  ")
         if len(msgs) == 0:
             return
-        await evt.reply("\n".join(msgs), html_in_markdown=True)
+        await evt.reply("\n".join(msgs), allow_html=True)
