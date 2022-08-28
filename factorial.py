@@ -14,17 +14,35 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from typing import List, Tuple
+from decimal import localcontext, Decimal, MAX_EMAX
+import math
 
 from maubot import Plugin, MessageEvent
 from maubot.handlers import command
 
-MAX_FACTORIAL = 10000
+MAX_EXACT_FACTORIAL = 10000
+if MAX_EMAX >= 999999999999999999:  # 64-bit
+    MAX_APPROX_FACTORIAL = 61154108320430275
+elif MAX_EMAX >= 425000000:  # 32-bit
+    MAX_APPROX_FACTORIAL = 57988439
+else:  # ???
+    MAX_APPROX_FACTORIAL = MAX_EXACT_FACTORIAL
 MAX_EXACT_VALUE_LENGTH = 50
+MAX_EXACT_VALUE = 10 ** MAX_EXACT_VALUE_LENGTH - 1
 MAX_FACTORIALS_IN_MESSAGE = 10
 SCIENTIFIC_NOTATION_DECIMALS = 5
 
 
 class FactorialBot(Plugin):
+    @staticmethod
+    def _stirling(n: int) -> Decimal:
+        with localcontext() as ctx:
+            dtau = Decimal(2 * math.pi)
+            de = Decimal(math.e)
+            ctx.Emax = MAX_EMAX
+            d = Decimal(n)
+            return (dtau * d).sqrt() * (d / de) ** d
+
     @staticmethod
     def _factorial(n: int, interval: int) -> int:
         if n < 0:
@@ -34,6 +52,15 @@ class FactorialBot(Plugin):
             result *= n
             n -= interval
         return result
+
+    @staticmethod
+    def _science(dec: Decimal) -> str:
+        dt = dec.as_tuple()
+        first_digit = dt.digits[0]
+        decimals = dt.digits[1:SCIENTIFIC_NOTATION_DECIMALS+1]
+        decimals_str = "".join(str(x) for x in decimals)
+        exponent = dt.exponent + len(dt.digits) - 1
+        return f"{first_digit}.{decimals_str} × 10<sup>{exponent}</sup>"
 
     @command.passive("([0-9]+)(!+)", multiple=True)
     async def handler(self, evt: MessageEvent, matches: List[Tuple[str, str]]) -> None:
@@ -47,14 +74,17 @@ class FactorialBot(Plugin):
             n = int(n_str)
             interval = len(interval_str)
             symbol = "="
-            if n / interval > MAX_FACTORIAL:
-                result = "over 9000"
-                symbol = "is"
+            if n / interval > MAX_EXACT_FACTORIAL:
+                if interval == 1 and n <= MAX_APPROX_FACTORIAL:
+                    result = self._science(self._stirling(n))
+                    symbol = "≈"
+                else:
+                    result = "over 9000"
+                    symbol = "is"
             else:
-                result = str(self._factorial(n, interval))
-                if len(result) > MAX_EXACT_VALUE_LENGTH:
-                    result = (f"{result[0]}.{result[1:SCIENTIFIC_NOTATION_DECIMALS+1]}"
-                              f" × 10<sup>{len(result)-1}</sup>")
+                result = self._factorial(n, interval)
+                if result > MAX_EXACT_VALUE:
+                    result = self._science(Decimal(result))
                     symbol = "≈"
             msgs.append(f"{n}{'!' * interval} {symbol} {result}  ")
         if len(msgs) == 0:
