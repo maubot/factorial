@@ -15,15 +15,29 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from __future__ import annotations
 
-from _pydecimal import localcontext, Decimal
+try:
+    from _pydecimal import localcontext, Decimal, MAX_EMAX
+    pydecimal = True
+except ImportError:
+    from decimal import localcontext, Decimal, MAX_EMAX
+    pydecimal = False
 import math
 
 from maubot import Plugin, MessageEvent
 from maubot.handlers import command
 
 MAX_EXACT_FACTORIAL = 10000
-MAX_APPROX_FACTORIAL = 10**1000
-MAX_FACTORIAL_EXPONENT = 10**1003  # Approximate exponent to fit the MAX_APPROX_FACTORIAL result
+if pydecimal:
+    MAX_APPROX_FACTORIAL = 10**1000
+    MAX_FACTORIAL_EXPONENT = 10**1003  # Approximate to fit the MAX_APPROX_FACTORIAL result
+else:
+    if MAX_EMAX >= 999999999999999999:  # 64-bit
+        MAX_APPROX_FACTORIAL = 61154108320430275
+    elif MAX_EMAX >= 425000000:  # 32-bit
+        MAX_APPROX_FACTORIAL = 57988439
+    else:  # ???
+        MAX_APPROX_FACTORIAL = MAX_EXACT_FACTORIAL
+    MAX_FACTORIAL_EXPONENT = MAX_EMAX
 MAX_EXACT_VALUE_LENGTH = 50
 MAX_EXACT_VALUE = 10 ** MAX_EXACT_VALUE_LENGTH - 1
 MAX_FACTORIALS_IN_MESSAGE = 10
