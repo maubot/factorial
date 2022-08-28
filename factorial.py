@@ -14,19 +14,15 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from typing import List, Tuple
-from decimal import localcontext, Decimal, MAX_EMAX
+from _pydecimal import localcontext, Decimal
 import math
 
 from maubot import Plugin, MessageEvent
 from maubot.handlers import command
 
 MAX_EXACT_FACTORIAL = 10000
-if MAX_EMAX >= 999999999999999999:  # 64-bit
-    MAX_APPROX_FACTORIAL = 61154108320430275
-elif MAX_EMAX >= 425000000:  # 32-bit
-    MAX_APPROX_FACTORIAL = 57988439
-else:  # ???
-    MAX_APPROX_FACTORIAL = MAX_EXACT_FACTORIAL
+MAX_APPROX_FACTORIAL = 10**1000
+MAX_FACTORIAL_EXPONENT = 10**1003  # Approximate exponent to fit the MAX_APPROX_FACTORIAL result
 MAX_EXACT_VALUE_LENGTH = 50
 MAX_EXACT_VALUE = 10 ** MAX_EXACT_VALUE_LENGTH - 1
 MAX_FACTORIALS_IN_MESSAGE = 10
@@ -37,9 +33,9 @@ class FactorialBot(Plugin):
     @staticmethod
     def _stirling(n: int) -> Decimal:
         with localcontext() as ctx:
-            dtau = Decimal(2 * math.pi)
+            ctx.Emax = MAX_FACTORIAL_EXPONENT
+            dtau = Decimal(2 * math.tau)
             de = Decimal(math.e)
-            ctx.Emax = MAX_EMAX
             d = Decimal(n)
             return (dtau * d).sqrt() * (d / de) ** d
 
