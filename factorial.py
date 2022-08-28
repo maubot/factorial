@@ -28,8 +28,8 @@ from maubot.handlers import command
 
 MAX_EXACT_FACTORIAL = 10000
 if pydecimal:
-    MAX_APPROX_FACTORIAL = 10**1000
-    MAX_FACTORIAL_EXPONENT = 10**1003  # Approximate to fit the MAX_APPROX_FACTORIAL result
+    MAX_APPROX_FACTORIAL = 10**100
+    MAX_FACTORIAL_EXPONENT = 10**110  # Approximate to fit the MAX_APPROX_FACTORIAL result
 else:
     if MAX_EMAX >= 999999999999999999:  # 64-bit
         MAX_APPROX_FACTORIAL = 61154108320430275
