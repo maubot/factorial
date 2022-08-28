@@ -5,4 +5,4 @@ A simple [maubot](https://github.com/maubot/maubot) that calculates expected and
 Simply type a number followed by one or more exclamation marks.
 Note that multiple exclamation marks means a double factorial, not a factorial applied twice.
 
-![preview](https://img.mau.lu/iDMwv.png)
+![preview](/preview.png)
