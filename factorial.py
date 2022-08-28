@@ -49,10 +49,10 @@ class FactorialBot(Plugin):
     def _stirling(n: int) -> Decimal:
         with localcontext() as ctx:
             ctx.Emax = MAX_FACTORIAL_EXPONENT
-            dtau = Decimal(2 * math.tau)
+            dtau = Decimal(math.tau)
             de = Decimal(math.e)
-            d = Decimal(n)
-            return (dtau * d).sqrt() * (d / de) ** d
+            dn = Decimal(n)
+            return (dtau * dn).sqrt() * (dn / de) ** dn
 
     @staticmethod
     def _factorial(n: int, interval: int) -> int:
