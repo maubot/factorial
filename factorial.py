@@ -13,7 +13,8 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-from typing import List, Tuple
+from __future__ import annotations
+
 from _pydecimal import localcontext, Decimal
 import math
 
@@ -59,7 +60,7 @@ class FactorialBot(Plugin):
         return f"{first_digit}.{decimals_str} × 10<sup>{exponent}</sup>"
 
     @command.passive("([0-9]+)(!+)", multiple=True)
-    async def handler(self, evt: MessageEvent, matches: List[Tuple[str, str]]) -> None:
+    async def handler(self, evt: MessageEvent, matches: list[tuple[str, str]]) -> None:
         await evt.mark_read()
         msgs = []
         for _, n_str, interval_str in matches:
