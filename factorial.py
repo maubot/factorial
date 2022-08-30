@@ -77,6 +77,7 @@ class FactorialBot(Plugin):
     async def handler(self, evt: MessageEvent, matches: list[tuple[str, str]]) -> None:
         await evt.mark_read()
         msgs = []
+        dedup = set()
         for _, n_str, interval_str in matches:
             if len(msgs) >= MAX_FACTORIALS_IN_MESSAGE:
                 msgs.append("...")
@@ -84,6 +85,9 @@ class FactorialBot(Plugin):
 
             n = int(n_str)
             interval = len(interval_str)
+            if (n, interval) in dedup:
+                continue
+            dedup.add((n, interval))
             symbol = "="
             if n / interval > MAX_EXACT_FACTORIAL:
                 if interval == 1 and n <= MAX_APPROX_FACTORIAL:
