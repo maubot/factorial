@@ -68,7 +68,9 @@ class FactorialBot(Plugin):
     def _science(dec: Decimal) -> str:
         dt = dec.as_tuple()
         first_digit = dt.digits[0]
-        decimals = dt.digits[1:SCIENTIFIC_NOTATION_DECIMALS+1]
+        decimals = list(dt.digits[1:SCIENTIFIC_NOTATION_DECIMALS+1])
+        if len(dt.digits) > SCIENTIFIC_NOTATION_DECIMALS+1 and dt.digits[SCIENTIFIC_NOTATION_DECIMALS+1] >= 5:
+            decimals[-1] += 1
         decimals_str = "".join(str(x) for x in decimals)
         exponent = dt.exponent + len(dt.digits) - 1
         return f"{first_digit}.{decimals_str} × 10<sup>{exponent}</sup>"
